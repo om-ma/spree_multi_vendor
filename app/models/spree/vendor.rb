@@ -1,6 +1,11 @@
 module Spree
   class Vendor < Spree::Base
     extend FriendlyId
+    include TranslatableResource
+    include TranslatableResourceSlug
+
+    TRANSLATABLE_FIELDS = %i[name about_us contact_us slug].freeze
+    translates(*TRANSLATABLE_FIELDS)
 
     acts_as_paranoid
     acts_as_list column: :priority
@@ -11,7 +16,7 @@ module Spree
               uniqueness: { case_sensitive: false }
 
     validates :slug, uniqueness: true
-    validates_associated :image if Spree.version.to_f >= 3.6
+    validates_associated :image
 
     validates :notification_email, email: true, allow_blank: true
 
@@ -48,20 +53,10 @@ module Spree
       update(notification_email: email)
     end
 
-    # Spree Globalize support
-    # https://github.com/spree-contrib/spree_multi_vendor/issues/104
-    if defined?(SpreeGlobalize)
-      attr_accessor :translations_attributes
-      translates :name,
-                 :about_us,
-                 :contact_us,
-                 :slug, fallbacks_for_empty_translations: true
-    end
-
     private
 
     def create_stock_location
-      stock_locations.where(name: name, country: Spree::Country.default).first_or_create!
+      stock_locations.where(name: name, country: Spree::Store.default.default_country).first_or_create!
     end
 
     def should_generate_new_friendly_id?
