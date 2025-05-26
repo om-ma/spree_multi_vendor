@@ -1,5 +1,5 @@
 module SpreeMultiVendor::Spree::Api::BaseControllerDecorator
-  Spree::Api::V1::BaseController.include(Spree::Api::VendorHelper)
+  Spree::Api::BaseController.include(Spree::Api::VendorHelper)
 
   def self.prepended(base)
     base.helper_method :current_spree_vendor
